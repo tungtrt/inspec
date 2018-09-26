@@ -2,6 +2,7 @@
 
 require 'json'
 require 'net/http'
+require_relative './json_automate.rb'
 
 module Inspec::Reporters
   class Automate < JsonAutomate

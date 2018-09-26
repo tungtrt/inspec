@@ -181,6 +181,7 @@ module Inspec
         'json-rspec',
         'junit',
         'progress',
+        'proto',
         'yaml',
       ]
 

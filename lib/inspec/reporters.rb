@@ -1,10 +1,12 @@
 require 'inspec/reporters/base'
+
+require 'inspec/reporters/automate'
 require 'inspec/reporters/cli'
 require 'inspec/reporters/json'
 require 'inspec/reporters/json_automate'
 require 'inspec/reporters/json_min'
 require 'inspec/reporters/junit'
-require 'inspec/reporters/automate'
+require 'inspec/reporters/proto'
 require 'inspec/reporters/yaml'
 
 module Inspec::Reporters
@@ -29,6 +31,8 @@ module Inspec::Reporters
       reporter = Inspec::Reporters::Automate.new(config)
     when 'yaml'
       reporter = Inspec::Reporters::Yaml.new(config)
+    when 'proto'
+      reporter = Inspec::Reporters::Proto.new(config)
     else
       raise NotImplementedError, "'#{name}' is not a valid reporter type."
     end

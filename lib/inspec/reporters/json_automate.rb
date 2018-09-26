@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 require 'json'
+require_relative './json.rb'
 
 module Inspec::Reporters
   class JsonAutomate < Json
