@@ -60,16 +60,50 @@ end
 #=========================================================================================#
 #                        attribute provider plugin_type
 #=========================================================================================#
+describe 'attribute_provider plugin type' do
+  include FunctionalHelper
 
-# When no attribute providers are present, and we cannot resolve the value of an attribute,
-# error 1 and graceful halt.
+  let(:env) {{ INSPEC_CONFIG_DIR: File.join(config_dir_path, 'plugin_type_attribute_provider') }}
+  let(:ap_profile_path) { File.join(profile_path, 'attributes-attr-prvdr') }
+  let(:ap_attrs_path) { File.join(profile_path, 'attributes-attr-prvdr') }
 
-# When:
-#  * one test attribute_provider is present
-#  * and we cannot resolve the value using default values
-#  * and we cannot resolve the value using metadata values
-#  * and we cannot resolve the value using CLI --attrs
-#  then the attribute recieves the value from the test attribute_provider
+  # When no attribute providers are present, and we cannot resolve the value of an attribute,
+  # error 1 and graceful halt.
+  describe 'when no attribute provider plugins are installed' do
+    it 'aborts the run with an error message' do
+      invocation = 'exec '
+      invocation += File.join(ap_profile_path, 'case-01')
+      invocation += ' --no-create-lockfile '
+      invocation += ' --reporter=json '
+
+      run_result = inspec(invocation)
+      profiles = JSON.parse(run_result.stdout)['profiles']
+      control_result = profiles[0]['controls'][0]['results'][0]
+      control_result['status'].must_equal 'failed'
+      control_result['message'].must_include 'does not have an attribute'
+      control_result['message'].must_include 'case-01-attr-01'
+    end
+  end
+
+  # When:
+  #  * one test attribute_provider is present
+  #  * and we cannot resolve the value using default values
+  #  * and we cannot resolve the value using metadata values
+  #  * and we cannot resolve the value using CLI --attrs
+  #  then the attribute receives the value from the test attribute_provider
+  describe 'when an attribute provider is available and nothing else provides a value' do
+    it 'should obtain the value from the attribute provider' do
+      invocation = 'exec '
+      invocation += File.join(ap_profile_path, 'case-01')
+      invocation += ' --no-create-lockfile '
+      invocation += ' --reporter=json '
+
+      run_result = inspec_with_env(invocation, env)
+      profiles = JSON.parse(run_result.stdout)['profiles']
+      control_result = profiles[0]['controls'][0]['results'][0]
+      control_result['status'].must_equal 'success'
+    end
+  end
 
 # When:
 #  * one test attribute_provider is present
@@ -93,12 +127,25 @@ end
 #  * and we can resolve the value using CLI --attrs
 #  then the attribute recieves the value from the test CLI --attrs
 
+# When:
+#  * one test attribute_provider is present
+#  * and the parent profile inherits from the child profile
+#  * and the profiles have an attribute with the same name, but different values that identify where they came from
+#  * and we cannot resolve the value using metadata values
+#  * and we cannot resolve the value using CLI --attrs
+#  * and the test attribute_provider provides a value for parent.attribute
+#  * and the test attribute_provider does not provide a value for child.attribute
+#  then the parent.attribute recieves the value from the test attribute_provider
+#  then the child.attribute recieves the value from the child profile
 
 # When:
 #  * two test attribute_providers are present, Alpha and Beta
 #  * and we cannot otherwise resolve the value
 #  then the attribute recieves the value from (?????)
-
+#    * could have a preference list in plugins.json
+#    * could use alphabetical order
+#    * could a ranking system in plugins.json
+end
 
 #=========================================================================================#
 #                           inspec plugin command

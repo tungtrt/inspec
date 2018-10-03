@@ -1,0 +1,10 @@
+{
+  "plugins_config_version" : "1.0.0",
+  "plugins": [
+    {
+      "name": "inspec-attr-42",
+      "installation_type": "path",
+      "installation_path": "test/unit/mock/config_dirs/plugin_type_attribute_provider/lib/inspec-attr-42.rb"
+    }
+  ]
+}
