@@ -58,6 +58,49 @@ describe 'cli command plugins' do
 end
 
 #=========================================================================================#
+#                        attribute provider plugin_type
+#=========================================================================================#
+
+# When no attribute providers are present, and we cannot resolve the value of an attribute,
+# error 1 and graceful halt.
+
+# When:
+#  * one test attribute_provider is present
+#  * and we cannot resolve the value using default values
+#  * and we cannot resolve the value using metadata values
+#  * and we cannot resolve the value using CLI --attrs
+#  then the attribute recieves the value from the test attribute_provider
+
+# When:
+#  * one test attribute_provider is present
+#  * and we can resolve the value using default values
+#  * and we cannot resolve the value using metadata values
+#  * and we cannot resolve the value using CLI --attrs
+#  then the attribute recieves the value from the test attribute_provider
+
+# When:
+#  * one test attribute_provider is present
+#  * and we can resolve the value using default values
+#  * and we can resolve the value using metadata values
+#  * and we cannot resolve the value using CLI --attrs
+#  then the attribute recieves the value from the test attribute_provider (?????)
+
+
+# When:
+#  * one test attribute_provider is present
+#  * and we can resolve the value using default values
+#  * and we can resolve the value using metadata values
+#  * and we can resolve the value using CLI --attrs
+#  then the attribute recieves the value from the test CLI --attrs
+
+
+# When:
+#  * two test attribute_providers are present, Alpha and Beta
+#  * and we cannot otherwise resolve the value
+#  then the attribute recieves the value from (?????)
+
+
+#=========================================================================================#
 #                           inspec plugin command
 #=========================================================================================#
 # See lib/plugins/inspec-plugin-manager-cli/test
