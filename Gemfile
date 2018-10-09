@@ -10,6 +10,8 @@ end
 gem 'ffi', '>= 1.9.14'
 gem 'aws-sdk', '~> 2'
 
+gem 'train', git: 'https://github.com/inspec/train.git', branch: 'azure-vault'
+
 group :test do
   gem 'bundler', '~> 1.5'
   gem 'minitest', '~> 5.5'
