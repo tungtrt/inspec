@@ -5,8 +5,14 @@ module Inspec
   module Exceptions
     class AttributesFileDoesNotExist < ArgumentError; end
     class AttributesFileNotReadable < ArgumentError; end
-    class ResourceFailed < StandardError; end
-    class ResourceSkipped < StandardError; end
     class SecretsBackendNotFound < ArgumentError; end
+
+    class UnexpectedResourceOutcome < StandardError
+      attr_accessor :resource_name, :profile_name
+    end
+    class ResourceFailed < UnexpectedResourceOutcome; end
+    class ResourceSkipped < UnexpectedResourceOutcome; end
+    class ResourceUnableToRun < UnexpectedResourceOutcome; end
+
   end
 end
