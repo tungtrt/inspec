@@ -70,6 +70,9 @@ module Inspec
             skip_resource(e.message)
           rescue Inspec::Exceptions::ResourceFailed => e
             fail_resource(e.message)
+          rescue Inspec::Exceptions::ResourceUnableToRun => e
+            # Unables are treated as failures
+            fail_resource(e.message)
           rescue NoMethodError => e
             # The new platform resources have methods generated on the fly
             # for inspec check to work we need to skip these train errors

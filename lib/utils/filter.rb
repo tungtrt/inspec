@@ -24,7 +24,8 @@ module FilterTable
     # showing why the resource failed. This prevents the resource from
     # being added to the test collection and being evaluated.
     def resource_failed?
-      @original_exception.is_a?(Inspec::Exceptions::ResourceFailed)
+      @original_exception.is_a?(Inspec::Exceptions::ResourceFailed) ||
+        @original_exception.is_a?(Inspec::Exceptions::ResourceUnableToRun)
     end
 
     def resource_exception_message
@@ -341,7 +342,7 @@ module FilterTable
             # self here is the resource instance
             filter_table_instance = table_class.new(self, method(raw_data_fetcher_method_name).call, ' with')
             filter_table_instance.method(method_name.to_sym).call(*args, &block)
-          rescue Inspec::Exceptions::ResourceFailed, Inspec::Exceptions::ResourceSkipped => e
+          rescue Inspec::Exceptions::UnexpectedResourceOutcome => e
             FilterTable::ExceptionCatcher.new(resource_class, e)
           end
         end
