@@ -19,14 +19,19 @@ class ExceptionResourceTest < Inspec.resource(1)
     end
 
     # Should raise Inspec::Exceptions::SkipResource but not halt run
-    # Example: Command not found
+    # Example: platform mismatch
     describe exception_resource_test('foo', :skip_me) do
       its('value') { should eq 'foo' }
     end
 
     # Should raise Inspec::Exceptions::FailResource but not halt run
-    # Example: Command failed
     describe exception_resource_test('foo', :fail_me) do
+      its('value') { should eq 'foo' }
+    end
+
+    # Should raise Inspec::Exceptions::ResourceUnAbleToRun but not halt run
+    # Example: Command not found
+    describe exception_resource_test('foo', :unable_me) do
       its('value') { should eq 'foo' }
     end
   "
@@ -41,6 +46,8 @@ class ExceptionResourceTest < Inspec.resource(1)
       raise Inspec::Exceptions::ResourceSkipped, 'Skipping because reasons'
     when :fail_me
       raise Inspec::Exceptions::ResourceFailed, 'Failing because reasons'
+    when :unable_me
+      raise Inspec::Exceptions::ResourceUnableToRun, 'Unable because reasons'
     end
   end
 
@@ -59,6 +66,8 @@ class ExceptionResourceTest < Inspec.resource(1)
       raise Inspec::Exceptions::ResourceSkipped, 'Skipping inside FilterTable'
     when 'fail_me'
       raise Inspec::Exceptions::ResourceFailed, 'Failing inside FilterTable'
+    when 'unable_me'
+      raise Inspec::Exceptions::ResourceUnableToRun, 'Unable inside FilterTable'
     end
     [{ 'matters' => 'it really does', 'another_filter' => 'example' }]
   end
@@ -69,6 +78,8 @@ class ExceptionResourceTest < Inspec.resource(1)
       raise Inspec::Exceptions::ResourceFailed, 'Failing inside matcher'
     when 'skip inside matcher'
       raise Inspec::Exceptions::ResourceSkipped, 'Skipping inside matcher'
+    when 'unable inside matcher'
+      raise Inspec::Exceptions::ResourceUnableToRun, 'Unable inside matcher'
     else
       'inside_matcher'
     end

@@ -34,82 +34,124 @@ describe 'resource exception' do
       checks[1][0][1][0].resource_skipped?.must_equal false
     end
 
-    it 'does not affect other tests' do
+    it 'fails resource when `Inspec::Exceptions::ResourceUnableToRun` is raised' do
+      checks[2][0][1][0].resource_failed?.must_equal true
+      checks[2][0][1][0].resource_exception_message.must_include 'Unable to run:'
+      checks[2][0][1][0].resource_exception_message.must_include 'Unable because reasons'
       checks[2][0][1][0].resource_skipped?.must_equal false
-      checks[2][0][1][0].resource_failed?.must_equal false
-      checks[2][0][1][0].resource_exception_message.must_be_nil
+    end
+
+    it 'does not affect other tests' do
+      checks[3][0][1][0].resource_skipped?.must_equal false
+      checks[3][0][1][0].resource_failed?.must_equal false
+      checks[3][0][1][0].resource_exception_message.must_be_nil
     end
   end
 
   describe 'within a matcher' do
     it 'fails resource when `Inspec::Exceptions::ResourceFailed` is raised' do
-      checks[3][0][1][0].resource_failed?.must_equal true
-      checks[3][0][1][0].resource_exception_message.must_equal 'Failing inside matcher'
-      checks[3][0][1][0].resource_skipped?.must_equal false
+      checks[4][0][1][0].resource_failed?.must_equal true
+      checks[4][0][1][0].resource_exception_message.must_equal 'Failing inside matcher'
+      checks[4][0][1][0].resource_skipped?.must_equal false
     end
 
     it 'skips resource when `Inspec::Exceptions::ResourceSkipped` is raised' do
-      checks[4][0][1][0].resource_skipped?.must_equal true
-      checks[4][0][1][0].resource_exception_message.must_equal 'Skipping inside matcher'
-      checks[4][0][1][0].resource_failed?.must_equal false
+      checks[5][0][1][0].resource_skipped?.must_equal true
+      checks[5][0][1][0].resource_exception_message.must_equal 'Skipping inside matcher'
+      checks[5][0][1][0].resource_failed?.must_equal false
+    end
+
+    it 'fails resource when `Inspec::Exceptions::ResourceUnableToRun` is raised' do
+      checks[6][0][1][0].resource_failed?.must_equal true
+      checks[6][0][1][0].resource_exception_message.must_include 'Unable to run:'
+      checks[6][0][1][0].resource_exception_message.must_include 'Unable inside matcher'
+      checks[6][0][1][0].resource_skipped?.must_equal false
     end
   end
 
   describe 'within a control' do
     it 'skips resource when `Inspec::Exceptions::ResourceSkipped` is raised' do
-      checks[5][0][1][0].resource_skipped?.must_equal true
-      checks[5][0][1][0].resource_exception_message.must_equal 'Skipping because reasons'
-      checks[5][0][1][0].resource_failed?.must_equal false
+      checks[7][0][1][0].resource_skipped?.must_equal true
+      checks[7][0][1][0].resource_exception_message.must_equal 'Skipping because reasons'
+      checks[7][0][1][0].resource_failed?.must_equal false
     end
 
     it 'fails resource when `Inspec::Exceptions::ResourceFailed` is raised' do
-      checks[5][1][1][0].resource_failed?.must_equal true
-      checks[5][1][1][0].resource_exception_message.must_equal 'Failing because reasons'
-      checks[5][1][1][0].resource_skipped?.must_equal false
+      checks[7][1][1][0].resource_failed?.must_equal true
+      checks[7][1][1][0].resource_exception_message.must_equal 'Failing because reasons'
+      checks[7][1][1][0].resource_skipped?.must_equal false
+    end
+
+    it 'fails resource when `Inspec::Exceptions::ResourceUnableToRun` is raised' do
+      checks[7][2][1][0].resource_failed?.must_equal true
+      checks[7][2][1][0].resource_exception_message.must_include 'Unable to run:'
+      checks[7][2][1][0].resource_exception_message.must_include 'Unable because reasons'
+      checks[7][2][1][0].resource_skipped?.must_equal false
     end
   end
 
   describe 'within FilterTable' do
     it 'skips resource when `Inspec::Exceptions::ResourceSkipped` is raised' do
-      checks[6][0][1][0].resource_skipped?.must_equal true
-      checks[6][0][1][0].resource_exception_message.must_equal 'Skipping inside FilterTable'
-      checks[6][0][1][0].resource_failed?.must_equal false
+      checks[8][0][1][0].resource_skipped?.must_equal true
+      checks[8][0][1][0].resource_exception_message.must_equal 'Skipping inside FilterTable'
+      checks[8][0][1][0].resource_failed?.must_equal false
     end
 
     it 'fails resource when `Inspec::Exceptions::ResourceFailed` is raised' do
-      checks[7][0][1][0].resource_failed?.must_equal true
-      checks[7][0][1][0].resource_exception_message.must_equal 'Failing inside FilterTable'
-      checks[7][0][1][0].resource_skipped?.must_equal false
+      checks[9][0][1][0].resource_failed?.must_equal true
+      checks[9][0][1][0].resource_exception_message.must_equal 'Failing inside FilterTable'
+      checks[9][0][1][0].resource_skipped?.must_equal false
+    end
+
+    it 'fails resource when `Inspec::Exceptions::ResourceUnableToRun` is raised' do
+      checks[10][0][1][0].resource_failed?.must_equal true
+      checks[10][0][1][0].resource_exception_message.must_include 'Unable to run:'
+      checks[10][0][1][0].resource_exception_message.must_include 'Unable inside FilterTable'
+      checks[10][0][1][0].resource_skipped?.must_equal false
     end
 
     describe 'and multiple filters are used' do
       it 'skips resource when `Inspec::Exceptions::ResourceSkipped` is raised' do
-        checks[8][0][1][0].resource_skipped?.must_equal true
-        checks[8][0][1][0].resource_exception_message.must_equal 'Skipping inside FilterTable'
-        checks[8][0][1][0].resource_failed?.must_equal false
+        checks[11][0][1][0].resource_skipped?.must_equal true
+        checks[11][0][1][0].resource_exception_message.must_equal 'Skipping inside FilterTable'
+        checks[11][0][1][0].resource_failed?.must_equal false
       end
 
       it 'fails resource when `Inspec::Exceptions::ResourceFailed` is raised' do
-        checks[9][0][1][0].resource_failed?.must_equal true
-        checks[9][0][1][0].resource_exception_message.must_equal 'Failing inside FilterTable'
-        checks[9][0][1][0].resource_skipped?.must_equal false
+        checks[12][0][1][0].resource_failed?.must_equal true
+        checks[12][0][1][0].resource_exception_message.must_equal 'Failing inside FilterTable'
+        checks[12][0][1][0].resource_skipped?.must_equal false
+      end
+
+      it 'fails resource when `Inspec::Exceptions::ResourceUnableToRun` is raised' do
+        checks[13][0][1][0].resource_failed?.must_equal true
+        checks[13][0][1][0].resource_exception_message.must_include 'Unable to run:'
+        checks[13][0][1][0].resource_exception_message.must_include 'Unable inside FilterTable'
+        checks[13][0][1][0].resource_skipped?.must_equal false
       end
 
       it 'does not halt the run/fail all tests when an incorrect filter is used' do
-        checks[10][0][1][0].resource_skipped?.must_equal true
-        checks[10][0][1][0].resource_exception_message.must_equal 'Skipping inside FilterTable'
-        checks[10][0][1][0].resource_failed?.must_equal false
+        checks[14][0][1][0].resource_skipped?.must_equal true
+        checks[14][0][1][0].resource_exception_message.must_equal 'Skipping inside FilterTable'
+        checks[14][0][1][0].resource_failed?.must_equal false
       end
 
       it 'does not halt the run/fail all tests when an incorrect filter is used' do
-        checks[11][0][1][0].resource_failed?.must_equal true
-        checks[11][0][1][0].resource_exception_message.must_equal 'Failing inside FilterTable'
-        checks[11][0][1][0].resource_skipped?.must_equal false
+        checks[15][0][1][0].resource_failed?.must_equal true
+        checks[15][0][1][0].resource_exception_message.must_equal 'Failing inside FilterTable'
+        checks[15][0][1][0].resource_skipped?.must_equal false
+      end
+
+      it 'does not halt the run/fail all tests when an incorrect filter is used' do
+        checks[16][0][1][0].resource_failed?.must_equal true
+        checks[16][0][1][0].resource_exception_message.must_include 'Unable to run:'
+        checks[16][0][1][0].resource_exception_message.must_include 'Unable inside FilterTable'
+        checks[16][0][1][0].resource_skipped?.must_equal false
       end
     end
 
     it 'does not affect regular FilterTable usage' do
-      checks[12][0][1][0].another_filter.must_equal ['example']
+      checks[17][0][1][0].another_filter.must_equal ['example']
     end
   end
 end
