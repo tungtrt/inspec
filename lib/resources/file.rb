@@ -41,19 +41,41 @@ module Inspec::Resources
       @file = inspec.backend.file(path)
     end
 
+    # Requires neither existance nor accessability
     %w{
-      type exist? file? block_device? character_device? socket? directory?
-      symlink? pipe? mode mode? owner owned_by? group grouped_into?
-      link_path shallow_link_path linked_to? mtime size selinux_label immutable?
-      product_version file_version version? md5sum sha256sum
-      path basename source source_path uid gid
+      exist? path basename
     }.each do |m|
       define_method m.to_sym do |*args|
         file.method(m.to_sym).call(*args)
       end
     end
 
+    # These require the file to exist and be able to stat
+    %w{
+      type file? block_device? character_device? socket? directory?
+      symlink? pipe? mode mode? owner owned_by? group grouped_into?
+      link_path shallow_link_path linked_to? mtime size selinux_label immutable?
+      product_version file_version version?
+      source source_path uid gid
+    }.each do |m|
+      define_method m.to_sym do |*args|
+        must_be_able_to_stat!
+        file.method(m.to_sym).call(*args)
+      end
+    end
+
+    # These require the file to exist and be readable
+    %w{
+      md5sum sha256sum
+    }.each do |m|
+      define_method m.to_sym do |*args|
+        must_be_readable!
+        file.method(m.to_sym).call(*args)
+      end
+    end
+
     def content
+      must_be_readable!
       res = file.content
       return nil if res.nil?
       res.force_encoding('utf-8')
@@ -64,28 +86,28 @@ module Inspec::Resources
     end
 
     def readable?(by_usergroup, by_specific_user)
-      return false unless exist?
+      must_be_able_to_stat!
       return skip_resource '`readable?` is not supported on your OS yet.' if @perms_provider.nil?
 
       file_permission_granted?('read', by_usergroup, by_specific_user)
     end
 
     def writable?(by_usergroup, by_specific_user)
-      return false unless exist?
+      must_be_able_to_stat!
       return skip_resource '`writable?` is not supported on your OS yet.' if @perms_provider.nil?
 
       file_permission_granted?('write', by_usergroup, by_specific_user)
     end
 
     def executable?(by_usergroup, by_specific_user)
-      return false unless exist?
+      must_be_able_to_stat!
       return skip_resource '`executable?` is not supported on your OS yet.' if @perms_provider.nil?
 
       file_permission_granted?('execute', by_usergroup, by_specific_user)
     end
 
     def allowed?(permission, opts = {})
-      return false unless exist?
+      must_be_able_to_stat!
       return skip_resource '`allowed?` is not supported on your OS yet.' if @perms_provider.nil?
 
       file_permission_granted?(permission, opts[:by], opts[:by_user])
@@ -138,6 +160,32 @@ module Inspec::Resources
     end
 
     private
+
+    def must_exist!
+      return if file.exists?
+      ex = Inspec::Exceptions::ResourceUnableToRun::File::NotFound.new("No such file '#{file.path}''" )
+      ex.path = file.path
+      ex.resource_name = 'file'
+      raise ex
+    end
+
+    def must_be_able_to_stat!
+      must_exist!
+      return if file.mode # TODO: check portability
+      ex = Inspec::Exceptions::ResourceUnableToRun::File::PermissionDenied.new("Cannot stat '#{file.path}''" )
+      ex.path = file.path
+      ex.resource_name = 'file'
+      raise ex
+    end
+
+    def must_be_readable!
+      must_be_able_to_stat!
+      return if readable?(nil, nil)
+      ex = Inspec::Exceptions::ResourceUnableToRun::File::NotReadable.new("Cannot read '#{file.path}''" )
+      ex.path = file.path
+      ex.resource_name = 'file'
+      raise ex
+    end
 
     def file_permission_granted?(access_type, by_usergroup, by_specific_user)
       raise '`file_permission_granted?` is not supported on your OS' if @perms_provider.nil?
