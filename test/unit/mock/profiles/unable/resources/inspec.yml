@@ -1,0 +1,8 @@
+name: unable
+title: Exercise resources that are unable to run
+maintainer: Demo, Inc.
+copyright: Demo, Inc.
+copyright_email: support@example.com
+license: Apache-2.0
+summary: Lots of things that inspec can't do, and doesn't do them well
+version: 0.1.0

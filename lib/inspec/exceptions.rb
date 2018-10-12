@@ -8,11 +8,15 @@ module Inspec
     class SecretsBackendNotFound < ArgumentError; end
 
     class UnexpectedResourceOutcome < StandardError
-      attr_accessor :resource_name, :profile_name
+      attr_accessor :resource_name, :payload, :profile_name
     end
     class ResourceFailed < UnexpectedResourceOutcome; end
     class ResourceSkipped < UnexpectedResourceOutcome; end
-    class ResourceUnableToRun < UnexpectedResourceOutcome; end
+    class ResourceUnableToRun < UnexpectedResourceOutcome
+      def message
+        'Unable to run: ' + super
+      end
+    end
 
   end
 end
