@@ -6,7 +6,10 @@ module UnableFuncTestHelper
   let(:files_path) { File.join(unable_fixtures_path, 'files') }
   let(:controls_path) { File.join(unable_fixtures_path, 'resources', 'controls') }
   let(:command) { "exec #{fixture_path}"}
-  let(:run_result) { run_inspec_process(command, json: true, env: env) }
+  let(:run_result) do
+    pre_run
+    run_inspec_process(command, json: true, env: env)
+  end
   let(:control_structs) { run_result.payload.json["profiles"][0]["controls"] }
   # Make id-status and id-message pairs for easier examination
   let(:control_statuses) { control_structs.map { |c| { id: c["id"], status: c["results"][0]["status"] } } }

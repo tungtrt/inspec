@@ -43,7 +43,7 @@ module Inspec::Resources
 
     # Requires neither existance nor accessability
     %w{
-      exist? path basename
+      exist? path basename source_path
     }.each do |m|
       define_method m.to_sym do |*args|
         file.method(m.to_sym).call(*args)
@@ -56,7 +56,7 @@ module Inspec::Resources
       symlink? pipe? mode mode? owner owned_by? group grouped_into?
       link_path shallow_link_path linked_to? mtime size selinux_label immutable?
       product_version file_version version?
-      source source_path uid gid
+      source uid gid
     }.each do |m|
       define_method m.to_sym do |*args|
         must_be_able_to_stat!
@@ -162,26 +162,23 @@ module Inspec::Resources
     private
 
     def must_exist!
-      return if file.exists?
-      ex = Inspec::Exceptions::ResourceUnableToRun::File::NotFound.new("No such file '#{file.path}''" )
-      ex.path = file.path
-      ex.resource_name = 'file'
-      raise ex
+      return if file.exist?
+      raise_unable(ex = Inspec::Exceptions::ResourceUnableToRun::File::NotFound.new("No such file '#{file.path}'" ))
     end
 
     def must_be_able_to_stat!
       must_exist!
       return if file.mode # TODO: check portability
-      ex = Inspec::Exceptions::ResourceUnableToRun::File::PermissionDenied.new("Cannot stat '#{file.path}''" )
-      ex.path = file.path
-      ex.resource_name = 'file'
-      raise ex
+      raise_unable(Inspec::Exceptions::ResourceUnableToRun::File::PermissionDenied.new("Cannot stat '#{file.path}'" ))
     end
 
     def must_be_readable!
       must_be_able_to_stat!
       return if readable?(nil, nil)
-      ex = Inspec::Exceptions::ResourceUnableToRun::File::NotReadable.new("Cannot read '#{file.path}''" )
+      raise_unable(Inspec::Exceptions::ResourceUnableToRun::File::NotReadable.new("Cannot read '#{file.path}'" ))
+    end
+
+    def raise_unable(ex)
       ex.path = file.path
       ex.resource_name = 'file'
       raise ex

@@ -14,9 +14,14 @@ module Inspec
     class ResourceSkipped < UnexpectedResourceOutcome; end
     class ResourceUnableToRun < UnexpectedResourceOutcome
       def message
-        'Unable to run: ' + super
+        'Unable to test: ' + super
+      end
+      class File < ResourceUnableToRun
+        attr_accessor :path
+        class NotFound < File; end
+        class PermissionDenied < File; end
+        class NotReadable < File; end
       end
     end
-
   end
 end

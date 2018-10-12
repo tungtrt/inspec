@@ -36,4 +36,4 @@ terraform.tfstate.backup
 inspec-azure.plan
 inspec-aws-*.plan
 contrib/*
-test/unit/mock/profiles/unable/files/unreadable.txt
+test/unit/mock/profiles/unable/files/unreadable_file
