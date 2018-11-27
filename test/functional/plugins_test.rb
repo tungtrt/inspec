@@ -97,7 +97,6 @@ describe 'attribute_provider plugin type' do
     let(:fixture_profile_name) { 'no-value-provided' }
     let(:use_plugin) { true }
     it 'should obtain the value from the attribute provider' do
-      byebug
       run_result
       run_result.exit_status.must_equal 0
       control_result['status'].must_equal 'success'
