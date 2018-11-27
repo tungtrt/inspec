@@ -61,24 +61,26 @@ end
 #                        attribute provider plugin_type
 #=========================================================================================#
 describe 'attribute_provider plugin type' do
-  include FunctionalHelper
+  include PluginFunctionalHelper
 
-  let(:env) {{ INSPEC_CONFIG_DIR: File.join(config_dir_path, 'plugin_type_attribute_provider') }}
-  let(:ap_profile_path) { File.join(profile_path, 'attributes-attr-prvdr') }
-  let(:ap_attrs_path) { File.join(profile_path, 'attributes-attr-prvdr') }
+  let(:fixture_profile_path) { File.join(profile_path, 'plugin-attribute-provider', fixture_profile_name) }
+  let(:run_result) do
+     if use_plugin
+      run_inspec_with_plugin('exec ' + fixture_profile_path, plugin_path: plugin_path )
+     else
+      run_inspec_process('exec ' + fixture_profile_path, json: true)
+     end
+  end
+  let(:control_result) { run_result.payload.json['profiles'][0]['controls'][0]['results'][0] }
+  let(:plugin_path) { File.join(mock_path, 'plugins', 'inspec-test-attribute-provider', 'lib', 'inspec-test-attribute-provider' ) }
+  let(:use_plugin) { false }
 
   # When no attribute providers are present, and we cannot resolve the value of an attribute,
-  # error 1 and graceful halt.
+  # fail the control and graceful halt.
   describe 'when no attribute provider plugins are installed' do
+    let(:fixture_profile_name) { 'no-value-provided' }
     it 'aborts the run with an error message' do
-      invocation = 'exec '
-      invocation += File.join(ap_profile_path, 'case-01')
-      invocation += ' --no-create-lockfile '
-      invocation += ' --reporter=json '
-
-      run_result = inspec(invocation)
-      profiles = JSON.parse(run_result.stdout)['profiles']
-      control_result = profiles[0]['controls'][0]['results'][0]
+      run_result.exit_status.must_equal 100
       control_result['status'].must_equal 'failed'
       control_result['message'].must_include 'does not have an attribute'
       control_result['message'].must_include 'case-01-attr-01'
@@ -92,15 +94,12 @@ describe 'attribute_provider plugin type' do
   #  * and we cannot resolve the value using CLI --attrs
   #  then the attribute receives the value from the test attribute_provider
   describe 'when an attribute provider is available and nothing else provides a value' do
+    let(:fixture_profile_name) { 'no-value-provided' }
+    let(:use_plugin) { true }
     it 'should obtain the value from the attribute provider' do
-      invocation = 'exec '
-      invocation += File.join(ap_profile_path, 'case-01')
-      invocation += ' --no-create-lockfile '
-      invocation += ' --reporter=json '
-
-      run_result = inspec_with_env(invocation, env)
-      profiles = JSON.parse(run_result.stdout)['profiles']
-      control_result = profiles[0]['controls'][0]['results'][0]
+      byebug
+      run_result
+      run_result.exit_status.must_equal 0
       control_result['status'].must_equal 'success'
     end
   end
