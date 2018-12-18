@@ -1,5 +1,13 @@
 require 'inspec/base_cli'
 
+# Under some conditions (unit testing in particular) we may end
+# up in a require-dependency loop for BaseCLI.
+# Go ahead and open the class here so we don't have a NameError.
+module Inspec
+  class BaseCLI < Thor
+  end
+end
+
 module Inspec::Plugin::V2::PluginType
   class CliCommand < Inspec::BaseCLI
     # initalize log options for plugins
