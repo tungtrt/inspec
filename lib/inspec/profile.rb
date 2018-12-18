@@ -91,7 +91,7 @@ module Inspec
       @target = options[:target]
       @logger = options[:logger] || Logger.new(nil)
       @locked_dependencies = options[:dependencies]
-      @controls = options[:controls] || []
+      @controls = options[:controls] || [] # CLI control filter options
       @writable = options[:writable] || false
       @profile_id = options[:id]
       @profile_name = options[:profile_name]
@@ -117,26 +117,36 @@ module Inspec
       @runtime_profile = RuntimeProfile.new(self)
       @backend.profile = @runtime_profile
 
+      # The AttributeRegistry is in charge of keeping track of attributes.
+      # This call has a motley collection of arguments, but they were spreadout
+      # over Runner, Profile, and ProfileContext, so at least gathering them
+      # in one place is an improvement.
+      Inspec::AttributeRegistry.register_external_attributes(name, runner_opts: options, metadata: metadata)
+
       @runner_context =
         options[:profile_context] ||
-        Inspec::ProfileContext.for_profile(self, @backend, @attr_values)
+        Inspec::ProfileContext.for_profile(self, @backend)
 
       @supports_platform = metadata.supports_platform?(@backend)
       @supports_runtime = metadata.supports_runtime?
-      register_metadata_attributes
     end
 
-    def register_metadata_attributes
-      if metadata.params.key?(:attributes) && metadata.params[:attributes].is_a?(Array)
-        metadata.params[:attributes].each do |attribute|
-          attr_dup = attribute.dup
-          name = attr_dup.delete(:name)
-          @runner_context.register_attribute(name, attr_dup)
-        end
-      elsif metadata.params.key?(:attributes)
-        Inspec::Log.warn 'Attributes must be defined as an Array. Skipping current definition.'
-      end
-    end
+    # def register_metadata_attributes
+    #   if metadata.params.key?(:attributes) && metadata.params[:attributes].is_a?(Array)
+    #     metadata.params[:attributes].each do |attribute|
+    #       attr_options = attribute.dup
+    #       name = attr_options.delete(:name)
+    #       attr_options[:provenance] = {
+    #         provider: :metadata,
+    #         profile: metadata.params[:name],
+    #         file: 'inspec.yml',
+    #       }
+    #       @runner_context.register_attribute(name, attr_options)
+    #     end
+    #   elsif metadata.params.key?(:attributes)
+    #     Inspec::Log.warn 'Attributes must be defined as an Array. Skipping current definition.'
+    #   end
+    # end
 
     def name
       metadata.params[:name]

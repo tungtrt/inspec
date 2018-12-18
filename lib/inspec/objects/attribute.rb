@@ -3,6 +3,7 @@
 module Inspec
   class Attribute
     attr_accessor :name
+    attr_reader :trace
 
     VALID_TYPES = %w{
       String
@@ -13,6 +14,29 @@ module Inspec
       Boolean
       Any
     }.freeze
+
+    # If you call `attribute` in a control file, the attribute will receive this priority.
+    # You can override that with a :priority option.
+    DEFAULT_PRIORITY_FOR_DSL_ATTRIBUTES = 20
+
+    #===========================================================================#
+    #                        Class TraceEntry
+    #===========================================================================#
+
+    # Information about how the attribute obtained its value.
+    # Each time it changes, a TraceEntry is added to the #trace array.
+    TraceEntry = Struct.new(
+      :provider,  # Name of the plugin
+      :priority,  # Priority of this plugin for resolving conflicts.  1-100, higher numbers win.
+      :profile,   # Profile from which the attribute was being set
+      :value,     # New value, if provided.
+      :file,      # File containing the attribute-changing action, if known
+      :line,      # Line in file containing the attribute-changing action, if known
+    )
+
+    #===========================================================================#
+    #                    Class DEFAULT_ATTRIBUTE
+    #===========================================================================#
 
     DEFAULT_ATTRIBUTE = Class.new do
       def initialize(name)
@@ -39,69 +63,110 @@ module Inspec
       end
     end
 
+    #===========================================================================#
+    #                       Class Inspec::Attribute
+    #===========================================================================#
+
+    attr_reader :current_value, :default_value, :description, :identifier, :name, :title, :type_restriction
+
     def initialize(name, options = {})
       @name = name
-      @opts = options
-      validate_value_type(default) if @opts.key?(:type) && @opts.key?(:default)
-      @value = nil
+      @type_restriction = options[:type]
+      @required = options[:required]
+
+      # Array of TraceEntry objeccts.  These compete with one another to determine
+      # the value of the attribute when value() is called, as well as providing a
+      # debugging record of when and how the value changed.
+      @trace = []
+
+      @current_value = nil  # Will be determined in determine_current_value!
+
+      # For consistency, call update to set everything else
+      update(options)
     end
 
-    def value=(new_value)
-      validate_value_type(new_value) if @opts.key?(:type)
-      @value = new_value
-    end
+    #--------------------------------------------------------------------------#
+    #                      Metadata and Marshalling
+    #--------------------------------------------------------------------------#
 
-    def value
-      if @value.nil?
-        validate_required(@value) if @opts[:required] == true
-        @value = default
-      else
-        @value
-      end
-    end
-
-    def title
-      @opts[:title]
-    end
-
-    def description
-      @opts[:description]
+    def required?
+      @required == true
     end
 
     def ruby_var_identifier
-      @opts[:identifier] || 'attr_' + @name.downcase.strip.gsub(/\s+/, '-').gsub(/[^\w-]/, '')
+      identifier || 'attr_' + name.downcase.strip.gsub(/\s+/, '-').gsub(/[^\w-]/, '')
     end
 
     def to_hash
+      opts = {}
+      opts[:title] = title if title
+      opts[:default] = value
+      opts[:description] = description if description
+      opts[:required] = required? if required?
+      opts[:identifier] = identifier if identifier
+
       {
-        name: @name,
-        options: @opts,
+        name: name,
+        options: opts,
       }
     end
 
     def to_ruby
-      res = ["#{ruby_var_identifier} = attribute('#{@name}',{"]
+      res = ["#{ruby_var_identifier} = attribute('#{name}',{"]
       res.push "  title: '#{title}'," unless title.to_s.empty?
-      res.push "  default: #{default.inspect}," unless default.to_s.empty?
+      res.push "  default: #{value.inspect}," unless value.to_s.empty?
       res.push "  description: '#{description}'," unless description.to_s.empty?
       res.push '})'
       res.join("\n")
     end
 
-    def to_s
-      "Attribute #{@name} with #{@value}"
+    #--------------------------------------------------------------------------#
+    #                           Managing Value
+    #--------------------------------------------------------------------------#
+
+    def update(options)
+      @title = options[:title] if options.key?(:title)
+      @description = options[:description] if options.key?(:description)
+      @required = opts[:required] if options.key?(:required)
+      @identifier = options[:identifier] if options.key?(:identifier)
+      @type_restriction = options[:type_restriction] if options.key?(:type_restriction)
+
+      raise 'trace_entry is required' unless options.key?(:trace_entry)
+      trace << options[:trace_entry]
+
+      if type_restriction && options.key?(:default)
+        enforce_type_validation(options[:default])
+      end
+
+      update_current_value!
+    end
+
+    def value
+      update_current_value!
+      enforce_presence_validation if required?
+      current_value
     end
 
     private
+    def update_current_value!
+      # Examine the proposals to determine highest-priority value (descending sort)
+      proposals = trace.dup.sort { |a, b| b.priority <=> a.priority }
+      winning_value = proposals.first.value
+      @current_value = winning_value.nil? ? DEFAULT_ATTRIBUTE.new(name) : winning_value
+    end
 
-    def validate_required(value)
+    #--------------------------------------------------------------------------#
+    #                           Validation
+    #--------------------------------------------------------------------------#
+
+    private
+    def enforce_presence_validation
       # skip if we are not doing an exec call (archive/vendor/check)
       return unless Inspec::BaseCLI.inspec_cli_command == :exec
 
-      # value will be set already if a secrets file was passed in
-      if (!@opts.key?(:default) && value.nil?) || (@opts[:default].nil? && value.nil?)
+      if current_value.nil?
         error = Inspec::Attribute::RequiredError.new
-        error.attribute_name = @name
+        error.attribute_name = name
         raise error, "Attribute '#{error.attribute_name}' is required and does not have a value."
       end
     end
@@ -137,8 +202,8 @@ module Inspec
     end
 
     # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-    def validate_value_type(value)
-      type = validate_type(@opts[:type])
+    def enforce_type_validation(value)
+      type = validate_type(type_restriction)
       return if type == 'Any'
 
       invalid_type = false
@@ -162,8 +227,6 @@ module Inspec
     end
     # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
-    def default
-      @opts.key?(:default) ? @opts[:default] : DEFAULT_ATTRIBUTE.new(@name)
-    end
+
   end
 end

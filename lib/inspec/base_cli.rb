@@ -107,7 +107,7 @@ module Inspec
         banner: 'one two:/output/file/path',
         desc: 'Enable one or more output reporters: cli, documentation, html, progress, json, json-min, json-rspec, junit, yaml'
       option :attrs, type: :array,
-        desc: 'Load attributes file (experimental)'
+        desc: 'Load attributes from a YAML file'
       option :create_lockfile, type: :boolean,
         desc: 'Write out a lockfile based on this execution (unless one already exists)'
       option :backend_cache, type: :boolean,

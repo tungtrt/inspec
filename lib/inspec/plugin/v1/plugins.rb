@@ -13,7 +13,6 @@ module Inspec
     autoload :CLI, 'inspec/plugin/v1/plugin_types/cli'
     autoload :Fetcher, 'inspec/plugin/v1/plugin_types/fetcher'
     autoload :SourceReader, 'inspec/plugin/v1/plugin_types/source_reader'
-    autoload :Secret, 'inspec/plugin/v1/plugin_types/secret'
   end
 
   # PLEASE NOTE: The Plugin system is an internal mechanism for connecting

@@ -181,7 +181,8 @@ class Inspec::InspecCLI < Inspec::BaseCLI
     One or more reporters are used to generate output. If all tests passed
     (no fails, no skips) exit code 0 is returned. If some tests skipped but
     none failed, exit code 101 is returned. If at least one test failed, exit
-    code 100 is returned. If inspec failed for any other reason, exit code 1
+    code 100 is returned. If inspec failed because a plugin failed to load,
+    exit code 2 is returned. If inspec failed for any other reason, exit code 1
     is returned.
 
     Below are some examples of using `exec` with different test LOCATIONS:

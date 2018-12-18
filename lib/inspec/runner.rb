@@ -9,7 +9,6 @@ require 'inspec/backend'
 require 'inspec/profile_context'
 require 'inspec/profile'
 require 'inspec/metadata'
-require 'inspec/secrets'
 require 'inspec/dependencies/cache'
 # spec requirements
 
@@ -31,7 +30,7 @@ module Inspec
   class Runner
     extend Forwardable
 
-    attr_reader :backend, :rules, :attributes
+    attr_reader :backend, :rules
     def initialize(conf = {})
       @rules = []
       @conf = conf.dup
@@ -51,10 +50,17 @@ module Inspec
         RunnerRspec.new(@conf)
       end
 
-      # list of profile attributes
-      @attributes = {}
+      # About reading attributes:
+      #   @conf gets passed around a lot, eventually to
+      # Inspec::Attribute::Registry.register_external_attributes.
+      #
+      #   @conf may contain the key :attributes, which is to be a Hash
+      # of values passed in from the Runner API.
+      # This is how kitchen-inspec and the audit_cookbook pass in attributes.
+      #
+      #   @conf may contain the key :attrs, which is to be an Array
+      # of file paths, each a YAML file. This how --attrs works.
 
-      load_attributes(@conf)
       configure_transport
     end
 
@@ -95,7 +101,6 @@ module Inspec
           @test_collector.add_profile(requirement.profile)
         end
 
-        @attributes = profile.runner_context.attributes if @attributes.empty?
         tests = profile.collect_tests
         all_controls += tests unless tests.nil?
       end
@@ -143,30 +148,6 @@ module Inspec
       @test_collector.exit_code
     end
 
-    # determine all attributes before the execution, fetch data from secrets backend
-    def load_attributes(options)
-      options[:attributes] ||= {}
-
-      secrets_targets = options[:attrs]
-      return options[:attributes] if secrets_targets.nil?
-
-      secrets_targets.each do |target|
-        validate_attributes_file_readability!(target)
-
-        secrets = Inspec::SecretsBackend.resolve(target)
-        if secrets.nil?
-          raise Inspec::Exceptions::SecretsBackendNotFound,
-                "Cannot find parser for attributes file '#{target}'. " \
-                'Check to make sure file has the appropriate extension.'
-        end
-
-        next if secrets.attributes.nil?
-        options[:attributes].merge!(secrets.attributes)
-      end
-
-      options[:attributes]
-    end
-
     #
     # add_target allows the user to add a target whose tests will be
     # run when the user calls the run method.
@@ -198,7 +179,7 @@ module Inspec
                                            vendor_cache: @cache,
                                            backend: @backend,
                                            controls: @controls,
-                                           attributes: @conf[:attributes])
+                                           runner_conf: @conf)
       raise "Could not resolve #{target} to valid input." if profile.nil?
       @target_profiles << profile if supports_profile?(profile)
     end
@@ -287,22 +268,6 @@ module Inspec
       end.compact
 
       examples.each { |e| @test_collector.add_test(e, rule) }
-    end
-
-    def validate_attributes_file_readability!(target)
-      unless File.exist?(target)
-        raise Inspec::Exceptions::AttributesFileDoesNotExist,
-              "Cannot find attributes file '#{target}'. " \
-              'Check to make sure file exists.'
-      end
-
-      unless File.readable?(target)
-        raise Inspec::Exceptions::AttributesFileNotReadable,
-              "Cannot read attributes file '#{target}'. " \
-              'Check to make sure file is readable.'
-      end
-
-      true
     end
 
     def rspec_skipped_block(arg, opts, message)

@@ -1,0 +1,8 @@
+name: basic-attributes
+version: 1.0.0
+description: "A simple profile that exercises having both flat and complex data structures in attributes"
+maintainer: inspec@chef.io
+title: Attributes
+license: Apache-2.0
+supports:
+  - os

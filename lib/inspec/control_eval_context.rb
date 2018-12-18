@@ -26,8 +26,8 @@ module Inspec
         with_resource_dsl resources_dsl
 
         # allow attributes to be accessed within control blocks
-        define_method :attribute do |name|
-          Inspec::AttributeRegistry.find_attribute(name, profile_id).value
+        define_method :attribute do |name, options = {}|
+          Inspec::AttributeRegistry.find_or_define_attribute(name, profile_id, options).value
         end
 
         # Support for Control DSL plugins.
@@ -167,12 +167,17 @@ module Inspec
         end
 
         # method for attributes; import attribute handling
-        define_method :attribute do |name, options = nil|
-          if options.nil?
-            Inspec::AttributeRegistry.find_attribute(name, profile_id).value
-          else
-            profile_context_owner.register_attribute(name, options)
-          end
+        define_method :attribute do |name, options = {}|
+          location = caller_locations(1,1).first # TODO: is this accurate?
+          options[:trace_entry] = Attribute::TraceEntry.new(
+            :outer_control_context,
+            options[:priority] || Inspec::Attribute::DEFAULT_PRIORITY_FOR_DSL_ATTRIBUTES,
+            profile_id,
+            options[:default],
+            location.path,
+            location.lineno,
+          )
+          Inspec::AttributeRegistry.find_or_define_attribute(name, profile_id, options).value
         end
 
         define_method :skip_control do |id|
