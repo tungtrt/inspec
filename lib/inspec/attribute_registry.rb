@@ -1,6 +1,7 @@
 require 'forwardable'
 require 'singleton'
 require 'inspec/objects/attribute'
+require 'inspec/plugin/v2'
 
 module Inspec
 
@@ -42,18 +43,6 @@ module Inspec
       attributes_by_profile[profile]
     end
 
-    # Register any attributes that originate from outside of the profile files
-    def register_external_attributes(profile_name, data = {})
-      attributes_by_profile[profile_name] ||= {}
-
-      # In a more perfect world, we could let the plugins choose
-      # more of what to do; but as-is, the APIs that call this
-      # are a bit over-constrained.
-      # register_runner_api_attributes(profile_name, data[:runner_opts][:runner_conf][:attributes])
-      register_cli_option_attributes(profile_name, data[:runner_opts][:runner_conf])
-      # register_metadata_attributes(profile_name, data[:metadata])
-    end
-
     #-------------------------------------------------------------#
     #              Support for Individual Attributes
     #-------------------------------------------------------------#
@@ -90,6 +79,20 @@ module Inspec
     #-------------------------------------------------------------#
     #               Support for Attribute Providers
     #-------------------------------------------------------------#
+
+    # Register any attributes that originate from outside of the profile
+    # files at startup time
+    def register_external_attributes(profile_name, data = {})
+      attributes_by_profile[profile_name] ||= {}
+
+      # In a more perfect world, we could let the plugins choose
+      # more of what to do; but as-is, the APIs that call this
+      # are a bit over-constrained.
+      # register_runner_api_attributes(profile_name, data[:runner_opts][:runner_conf][:attributes])
+      register_cli_option_attributes(profile_name, data[:runner_opts][:runner_conf])
+      # register_metadata_attributes(profile_name, data[:metadata])
+    end
+
     def provider_activators
       plugin_registry = Inspec::Plugin::V2::Registry.instance
       plugin_registry.find_activators(plugin_type: :attribute_provider)
@@ -179,6 +182,7 @@ module Inspec
     #-------------------------------------------------------------#
     #               Other Support
     #-------------------------------------------------------------#
+    public
 
     # Used in testing
     def __reset

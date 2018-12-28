@@ -169,14 +169,16 @@ module Inspec
         # method for attributes; import attribute handling
         define_method :attribute do |name, options = {}|
           location = caller_locations(1,1).first # TODO: is this accurate?
-          options[:trace_entry] = Attribute::TraceEntry.new(
-            :outer_control_context,
-            options[:priority] || Inspec::Attribute::DEFAULT_PRIORITY_FOR_DSL_ATTRIBUTES,
-            profile_id,
-            options[:default],
-            location.path,
-            location.lineno,
+          event = Attribute::Event.new(
+            provider: :outer_control_context,
+            priority: options[:priority] || Inspec::Attribute::DEFAULT_PRIORITY_FOR_DSL_ATTRIBUTES,
+            profile: profile_id,
+            path: location.path,
+            line: location.lineno,
           )
+          event.value = options[:default] if options.key?(:default)
+          options[:event] = event
+
           Inspec::AttributeRegistry.find_or_define_attribute(name, profile_id, options).value
         end
 

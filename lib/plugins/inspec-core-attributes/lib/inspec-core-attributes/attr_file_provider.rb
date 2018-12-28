@@ -25,13 +25,14 @@ module InspecPlugins::CoreAttributes
         attr_reg.register_attribute(
           attr_name,
           profile_name,
-          default: attr_value, # TODO: use value:, not default:
-          trace_entry: Inspec::Attribute::TraceEntry.new(
-            :attr_file,
-            self.priority_for_attribute(attr_name, profile_name),
-            profile_name,
-            attr_value,
-            file_path,
+          # TODO: deprecate use of 'default' as value-setting attribute
+          default: attr_value,
+          event: Inspec::Attribute::Event.new(
+            provider: :attr_file,
+            priority: self.priority_for_attribute(attr_name, profile_name),
+            profile: profile_name,
+            value: attr_value,
+            path: file_path,
             # TODO: can we get line data?
           )
         )

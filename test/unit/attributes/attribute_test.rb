@@ -6,28 +6,9 @@ require 'inspec/objects/attribute'
 describe Inspec::Attribute do
   let(:attribute) { Inspec::Attribute.new('test_attribute') }
 
-  it 'returns the actual value, not the default, if one is assigned' do
-    attribute.value = 'new_value'
-    attribute.value.must_equal 'new_value'
-  end
-
-  it 'support storing and returning false' do
-    attribute.value = false
-    attribute.value.must_equal false
-  end
-
-  it 'returns the default value if no value is assigned' do
-    attribute.value.must_be_kind_of Inspec::Attribute::DEFAULT_ATTRIBUTE
-    attribute.value.to_s.must_equal "Attribute 'test_attribute' does not have a value. Skipping test."
-  end
-
-  it 'has a default value that can be called like a nested map' do
-    attribute.value['hello']['world'][1][2]['three'].wont_be_nil
-  end
-
-  it 'has a default value that can take any nested method calls' do
-    attribute.value.call.some.fancy.functions.wont_be_nil
-  end
+  #----------------------------------------------------------------------#
+  #                  Setting Value using default: option
+  #----------------------------------------------------------------------#
 
   describe 'attribute with a default value set' do
     it 'returns the user-configured default value if no value is assigned' do
@@ -44,6 +25,22 @@ describe Inspec::Attribute do
       attribute = Inspec::Attribute.new('test_attribute', default: false)
       attribute.value.must_equal false
     end
+  end
+
+  #----------------------------------------------------------------------#
+  #                       value=(), value()
+  #----------------------------------------------------------------------#
+
+  describe 'setting the value via the value= method' do
+    it 'returns the actual value, not the default, if one is assigned' do
+      attribute.value = 'new_value'
+      attribute.value.must_equal 'new_value'
+    end
+
+    it 'support storing and returning false' do
+      attribute.value = false
+      attribute.value.must_equal false
+    end
 
     it 'returns value if overriding the default' do
       attribute = Inspec::Attribute.new('test_attribute', default: 'default_value')
@@ -52,6 +49,27 @@ describe Inspec::Attribute do
     end
   end
 
+  #----------------------------------------------------------------------#
+  #                       DEFAULT_ATTRIBUTE
+  #----------------------------------------------------------------------#
+  describe 'when no value is provided' do
+    it 'returns the default value if no value is assigned' do
+      attribute.value.must_be_kind_of Inspec::Attribute::DEFAULT_ATTRIBUTE
+      attribute.value.to_s.must_equal "Attribute 'test_attribute' does not have a value. Skipping test."
+    end
+
+    it 'has a default value that can be called like a nested map' do
+      attribute.value['hello']['world'][1][2]['three'].wont_be_nil
+    end
+
+    it 'has a default value that can take any nested method calls' do
+      attribute.value.call.some.fancy.functions.wont_be_nil
+    end
+  end
+
+  #----------------------------------------------------------------------#
+  #                      `required` validation
+  #----------------------------------------------------------------------#
   describe 'validate required method' do
     it 'does not error if a default is set' do
       attribute = Inspec::Attribute.new('test_attribute', default: 'default_value', required: true)
@@ -73,89 +91,95 @@ describe Inspec::Attribute do
     end
   end
 
+  #----------------------------------------------------------------------#
+  #                           type validation
+  #----------------------------------------------------------------------#
   describe 'validate value type method' do
     let(:opts) { {} }
     let(:attribute) { Inspec::Attribute.new('test_attribute', opts) }
 
     it 'validates a string type' do
       opts[:type] = 'string'
-      attribute.send(:validate_value_type, 'string')
+      attribute.send(:enforce_type_validation, 'string')
     end
 
     it 'returns an error if a invalid string is set' do
       opts[:type] = 'string'
-      ex = assert_raises(Inspec::Attribute::ValidationError) { attribute.send(:validate_value_type, 123) }
+      ex = assert_raises(Inspec::Attribute::ValidationError) { attribute.send(:enforce_type_validation, 123) }
       ex.message.must_match /Attribute 'test_attribute' with value '123' does not validate to type 'String'./
     end
 
     it 'validates a numeric type' do
       opts[:type] = 'numeric'
-      attribute.send(:validate_value_type, 123.33)
+      attribute.send(:enforce_type_validation, 123.33)
     end
 
     it 'returns an error if a invalid numeric is set' do
       opts[:type] = 'numeric'
-      ex = assert_raises(Inspec::Attribute::ValidationError) { attribute.send(:validate_value_type, 'invalid') }
+      ex = assert_raises(Inspec::Attribute::ValidationError) { attribute.send(:enforce_type_validation, 'invalid') }
       ex.message.must_match /Attribute 'test_attribute' with value 'invalid' does not validate to type 'Numeric'./
     end
 
     it 'validates a regex type' do
       opts[:type] = 'regex'
-      attribute.send(:validate_value_type, '/^\d*$/')
+      attribute.send(:enforce_type_validation, '/^\d*$/')
     end
 
     it 'returns an error if a invalid regex is set' do
       opts[:type] = 'regex'
-      ex = assert_raises(Inspec::Attribute::ValidationError) { attribute.send(:validate_value_type, '/(.+/') }
+      ex = assert_raises(Inspec::Attribute::ValidationError) { attribute.send(:enforce_type_validation, '/(.+/') }
       ex.message.must_match "Attribute 'test_attribute' with value '/(.+/' does not validate to type 'Regexp'."
     end
 
     it 'validates a array type' do
       opts[:type] = 'Array'
       value = [1, 2, 3]
-      attribute.send(:validate_value_type, value)
+      attribute.send(:enforce_type_validation, value)
     end
 
     it 'returns an error if a invalid array is set' do
       opts[:type] = 'Array'
       value = { a: 1, b: 2, c: 3 }
-      ex = assert_raises(Inspec::Attribute::ValidationError) { attribute.send(:validate_value_type, value) }
+      ex = assert_raises(Inspec::Attribute::ValidationError) { attribute.send(:enforce_type_validation, value) }
       ex.message.must_match /Attribute 'test_attribute' with value '{:a=>1, :b=>2, :c=>3}' does not validate to type 'Array'./
     end
 
     it 'validates a hash type' do
       opts[:type] = 'Hash'
       value = { a: 1, b: 2, c: 3 }
-      attribute.send(:validate_value_type, value)
+      attribute.send(:enforce_type_validation, value)
     end
 
     it 'returns an error if a invalid hash is set' do
       opts[:type] = 'hash'
-      ex = assert_raises(Inspec::Attribute::ValidationError) { attribute.send(:validate_value_type, 'invalid') }
+      ex = assert_raises(Inspec::Attribute::ValidationError) { attribute.send(:enforce_type_validation, 'invalid') }
       ex.message.must_match /Attribute 'test_attribute' with value 'invalid' does not validate to type 'Hash'./
     end
 
     it 'validates a boolean type' do
       opts[:type] = 'boolean'
-      attribute.send(:validate_value_type, false)
-      attribute.send(:validate_value_type, true)
+      attribute.send(:enforce_type_validation, false)
+      attribute.send(:enforce_type_validation, true)
     end
 
     it 'returns an error if a invalid boolean is set' do
       opts[:type] = 'boolean'
-      ex = assert_raises(Inspec::Attribute::ValidationError) { attribute.send(:validate_value_type, 'not_true') }
+      ex = assert_raises(Inspec::Attribute::ValidationError) { attribute.send(:enforce_type_validation, 'not_true') }
       ex.message.must_match /Attribute 'test_attribute' with value 'not_true' does not validate to type 'Boolean'./
     end
 
     it 'validates a any type' do
       opts[:type] = 'any'
-      attribute.send(:validate_value_type, false)
-      attribute.send(:validate_value_type, true)
-      attribute.send(:validate_value_type, 1)
-      attribute.send(:validate_value_type, 'bob')
+      attribute.send(:enforce_type_validation, false)
+      attribute.send(:enforce_type_validation, true)
+      attribute.send(:enforce_type_validation, 1)
+      attribute.send(:enforce_type_validation, 'bob')
     end
   end
 
+  #----------------------------------------------------------------------#
+  #                     Limiting type vocabulary
+  #----------------------------------------------------------------------#
   describe 'validate type method' do
     it 'converts regex to Regexp' do
       attribute.send(:validate_type, 'regex').must_equal 'Regexp'
@@ -211,3 +235,8 @@ describe Inspec::Attribute do
     end
   end
 end
+
+
+#----------------------------------------------------------------------#
+#               Determining Value via Trace Entries
+#----------------------------------------------------------------------#
