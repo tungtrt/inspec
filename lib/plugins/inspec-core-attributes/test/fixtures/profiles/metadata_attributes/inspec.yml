@@ -1,0 +1,43 @@
+name: metadata-attributes-test-profile
+maintainer: inspec@chef.io
+license: Apache-2.0
+summary: Profile for exercising setting attributes via metadata
+version: 0.1.0
+attributes:
+# Basic Set
+- name: basic_from_metadata
+  value: 'basic_value_from_metadata'
+
+# - name: hash_valued
+#   value:
+#     a: true
+#     b: false
+#     c: '123'
+
+
+
+# - name: val_numeric
+#   type: numeric
+#   default: 443
+# - name: val_numeric_override
+#   type: numeric
+#   default: '72.88'
+# - name: val_string
+#   type: string
+#   default: 'test-attr'
+# - name: val_boolean
+#   type: boolean
+#   default: true
+# - name: val_regex
+#   type: regex
+#   default: '/^\d*/'
+# - name: val_array
+#   type: array
+#   default:
+#     - a
+#     - b
+#     - c
+
+# - name: val_no_default
+# - name: val_no_default_with_type
+#   type: hash
