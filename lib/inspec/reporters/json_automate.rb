@@ -1,5 +1,5 @@
 
-require 'json'
+require "json"
 
 module Inspec::Reporters
   class JsonAutomate < Json

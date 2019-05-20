@@ -1,10 +1,10 @@
 # author: Christoph Hartmann
 # author: Dominik Richter
 
-require 'helper'
-require 'inspec/resource'
+require "helper"
+require "inspec/resource"
 
-describe 'Inspec::Resources::WMI' do
+describe "Inspec::Resources::WMI" do
 
   # Check the following as unit test
   # describe wmi({
@@ -16,16 +16,16 @@ describe 'Inspec::Resources::WMI' do
   # end
 
   # windows
-  it 'verify wmi parsing on windows' do
-    resource = MockLoader.new(:windows).load_resource('wmi', {class: 'win32_service', filter: "name like '%winrm%'" })
-    _(resource.send('DisplayName')).must_equal 'Windows Remote Management (WS-Management)'
+  it "verify wmi parsing on windows" do
+    resource = MockLoader.new(:windows).load_resource("wmi", { class: "win32_service", filter: "name like '%winrm%'" })
+    _(resource.send("DisplayName")).must_equal "Windows Remote Management (WS-Management)"
   end
 
   # ubuntu 14.04 with upstart
-  it 'fail wmi on ubuntu' do
-    resource = MockLoader.new(:ubuntu1404).load_resource('wmi', {class: 'win32_service', filter: "name like '%winrm%'" })
+  it "fail wmi on ubuntu" do
+    resource = MockLoader.new(:ubuntu1404).load_resource("wmi", { class: "win32_service", filter: "name like '%winrm%'" })
     _(resource.resource_failed?).must_equal true
     _(resource.resource_exception_message)
-      .must_equal 'Resource `wmi` is not supported on platform ubuntu/14.04.'
+      .must_equal "Resource `wmi` is not supported on platform ubuntu/14.04."
   end
 end

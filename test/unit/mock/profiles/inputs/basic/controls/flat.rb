@@ -1,7 +1,7 @@
 expecteds = {
   an_integer: 1,
-  a_quoted_string: 'Should not have quotes',
-  an_unquoted_string: 'Should not have quotes',
+  a_quoted_string: "Should not have quotes",
+  an_unquoted_string: "Should not have quotes",
   lowercase_true: true,
   titlecase_true: true,
   titlecase_false: false,
@@ -14,7 +14,7 @@ tests = expecteds.keys.map do |test_name|
   }
 end
 
-control 'flat' do
+control "flat" do
   tests.each do |details|
     describe "#{details[:name]} using string key" do
       subject { details[:input_via_string] }

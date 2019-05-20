@@ -1,5 +1,5 @@
 
-require 'yaml'
+require "yaml"
 
 module Inspec::Reporters
   class Yaml < Base

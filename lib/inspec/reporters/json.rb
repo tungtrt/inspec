@@ -1,5 +1,5 @@
 
-require 'json'
+require "json"
 
 module Inspec::Reporters
   class Json < Base
@@ -25,7 +25,7 @@ module Inspec::Reporters
         name: run_data[:platform][:name],
         release: run_data[:platform][:release],
       }
-      platform[:target_id] = @config['target_id'] if @config['target_id']
+      platform[:target_id] = @config["target_id"] if @config["target_id"]
       platform
     end
 

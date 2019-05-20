@@ -1,12 +1,12 @@
 
-require 'functional/helper'
+require "functional/helper"
 
-describe 'inspec report tests' do
+describe "inspec report tests" do
   include FunctionalHelper
 
-  describe 'report' do
-    it 'loads a json report' do
-      o = { 'reporter' => ['json'], 'report' => true }
+  describe "report" do
+    it "loads a json report" do
+      o = { "reporter" => ["json"], "report" => true }
       runner = ::Inspec::Runner.new(o)
       runner.add_target(example_profile)
       runner.run
@@ -15,10 +15,10 @@ describe 'inspec report tests' do
       runner.report.inspect.must_include ':status=>"passed"'
     end
 
-    it 'loads a json report twice' do
+    it "loads a json report twice" do
       skip "this doesn't work yet, but I'd like to poke at it"
 
-      o = { 'reporter' => ['json'], 'report' => true }
+      o = { "reporter" => ["json"], "report" => true }
       runner = ::Inspec::Runner.new(o)
       runner.add_target(example_profile)
       runner.run

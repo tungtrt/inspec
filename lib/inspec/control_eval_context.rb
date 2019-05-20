@@ -1,8 +1,8 @@
 # author: Dominik Richter
 # author: Christoph Hartmann
-require 'inspec/dsl'
-require 'inspec/dsl_shared'
-require 'rspec/core/dsl'
+require "inspec/dsl"
+require "inspec/dsl_shared"
+require "rspec/core/dsl"
 
 module Inspec
   #
@@ -235,7 +235,7 @@ module Inspec
 
         def block_location(block, alternate_caller)
           if block.nil?
-            alternate_caller[/^(.+:\d+):in .+$/, 1] || 'unknown'
+            alternate_caller[/^(.+:\d+):in .+$/, 1] || "unknown"
           else
             path, line = block.source_location
             "#{File.basename(path)}:#{line}"

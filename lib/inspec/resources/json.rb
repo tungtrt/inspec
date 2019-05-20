@@ -1,12 +1,12 @@
 
-require 'utils/object_traversal'
-require 'utils/enumerable_delegation'
-require 'utils/file_reader'
+require "utils/object_traversal"
+require "utils/enumerable_delegation"
+require "utils/file_reader"
 
 module Inspec::Resources
   class JsonConfig < Inspec.resource(1)
-    name 'json'
-    desc 'Use the json InSpec audit resource to test data in a JSON file.'
+    name "json"
+    desc "Use the json InSpec audit resource to test data in a JSON file."
     example <<~EXAMPLE
       describe json('policyfile.lock.json') do
         its(['cookbook_locks','omnibus','version']) { should eq('2.2.0') }
@@ -66,7 +66,7 @@ module Inspec::Resources
     private
 
     def parse(content)
-      require 'json'
+      require "json"
       JSON.parse(content)
     rescue => e
       raise Inspec::Exceptions::ResourceFailed, "Unable to parse JSON: #{e.message}"
@@ -85,7 +85,7 @@ module Inspec::Resources
       elsif opts.key?(:content)
         opts[:content]
       else
-        raise Inspec::Exceptions::ResourceFailed, 'No JSON content; must specify a file, command, or raw JSON content'
+        raise Inspec::Exceptions::ResourceFailed, "No JSON content; must specify a file, command, or raw JSON content"
       end
     end
 
@@ -103,7 +103,7 @@ module Inspec::Resources
     # for resources the subclass JsonConfig, this allows specification of the resource
     # base name in each subclass so we can build a good to_s method
     def resource_base_name
-      'JSON'
+      "JSON"
     end
   end
 end

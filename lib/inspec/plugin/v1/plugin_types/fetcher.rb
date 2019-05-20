@@ -1,7 +1,7 @@
 # author: Dominik Richter
 # author: Christoph Hartmann
-require 'inspec/file_provider'
-require 'inspec/plugin/v1/registry'
+require "inspec/file_provider"
+require "inspec/plugin/v1/registry"
 
 module Inspec
   module Plugins

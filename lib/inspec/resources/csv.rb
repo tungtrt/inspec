@@ -4,8 +4,8 @@
 # @see http://technicalpickles.com/posts/parsing-csv-with-ruby
 module Inspec::Resources
   class CsvConfig < JsonConfig
-    name 'csv'
-    desc 'Use the csv InSpec audit resource to test configuration data in a CSV file.'
+    name "csv"
+    desc "Use the csv InSpec audit resource to test configuration data in a CSV file."
     example <<~EXAMPLE
       describe csv('example.csv') do
         its('name') { should eq(['John', 'Alice']) }
@@ -19,7 +19,7 @@ module Inspec::Resources
     #      { 'name' => 'row2', 'col1' => 'value3', 'col2' => 'value4' }
     #    ]
     def parse(content)
-      require 'csv'
+      require "csv"
 
       # convert empty field to nil
       CSV::Converters[:blank_to_nil] = lambda do |field|
@@ -49,7 +49,7 @@ module Inspec::Resources
     # used by JsonConfig to build up a full to_s method
     # based on whether a file path, content, or command was supplied.
     def resource_base_name
-      'CSV'
+      "CSV"
     end
   end
 end

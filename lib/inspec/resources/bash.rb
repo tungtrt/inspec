@@ -1,12 +1,12 @@
 
-require 'utils/command_wrapper'
-require 'inspec/resources/command'
+require "utils/command_wrapper"
+require "inspec/resources/command"
 
 module Inspec::Resources
   class Bash < Cmd
-    name 'bash'
-    supports platform: 'unix'
-    desc 'Run a command or script in BASH.'
+    name "bash"
+    supports platform: "unix"
+    desc "Run a command or script in BASH."
     example <<~EXAMPLE
       describe bash('ls -al /') do
         its('stdout') { should match /bin/ }
@@ -23,7 +23,7 @@ module Inspec::Resources
 
     def initialize(command, options = {})
       @raw_command = command
-      options[:shell] = 'bash' if options.is_a?(Hash)
+      options[:shell] = "bash" if options.is_a?(Hash)
       super(CommandWrapper.wrap(command, options))
     end
 

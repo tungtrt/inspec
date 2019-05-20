@@ -1,17 +1,17 @@
 # author: Steven Danna <steve@chef.io>
 #
-require 'helper'
-require 'rbconfig'
-require 'mocha/test_unit'
-require 'inspec/shell_detector'
+require "helper"
+require "rbconfig"
+require "mocha/test_unit"
+require "inspec/shell_detector"
 
 module ShellDetectorTestHelpers
   def no_proc
-    Dir.expects(:exist?).with('/proc').returns(false)
+    Dir.expects(:exist?).with("/proc").returns(false)
   end
 
   def with_proc(shell)
-    Dir.expects(:exist?).with('/proc').returns(true)
+    Dir.expects(:exist?).with("/proc").returns(true)
     File.expects(:readlink).with("/proc/#{ppid}/exe").returns(shell)
   end
 
@@ -20,7 +20,7 @@ module ShellDetectorTestHelpers
   end
 
   def with_env(shell)
-    ENV.expects(:[]).with('SHELL').returns(shell)
+    ENV.expects(:[]).with("SHELL").returns(shell)
   end
 
   def with_pwuid(shell)
@@ -39,13 +39,13 @@ describe Inspec::ShellDetector do
 
   # Small hack to ensure we can test on windows
   it "returns nil immediately if running on windows" do
-    RbConfig::CONFIG.expects(:[]).with('host_os').returns('mswin')
+    RbConfig::CONFIG.expects(:[]).with("host_os").returns("mswin")
     subject.shell!.must_be_nil
   end
 
   describe "not on windows" do
     before do
-      RbConfig::CONFIG.expects(:[]).with('host_os').returns('beos')
+      RbConfig::CONFIG.expects(:[]).with("host_os").returns("beos")
     end
 
     it "detects the shell via /proc if it exists" do
