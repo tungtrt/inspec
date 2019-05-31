@@ -16,7 +16,6 @@ describe "example inheritance profile" do
 
   it "check succeeds without --profiles-path using inspec.yml" do
     prepare_examples("inheritance") do |dir|
-      out = inspec("vendor " + dir)
       out = inspec("check " + dir)
       out.stderr.must_equal ""
       out.stdout.must_match(/Valid.*true/)

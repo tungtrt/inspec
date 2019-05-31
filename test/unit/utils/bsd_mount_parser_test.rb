@@ -3,7 +3,7 @@
 require "helper"
 
 describe BsdMountParser do
-  let (:parser) { Class.new() { include BsdMountParser }.new }
+  let(:parser) { Class.new() { include BsdMountParser }.new }
 
   describe "#parse_mount_options" do
     it "parses nil content" do

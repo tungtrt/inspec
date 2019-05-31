@@ -4,7 +4,7 @@ require "helper"
 require "inspec/resource"
 
 describe "Inspec::Resources::X509Certificate" do
-  let (:resource_cert) do
+  let(:resource_cert) do
     load_resource(
       "x509_certificate",
       "test_certificate.rsa.crt.pem"
@@ -83,7 +83,7 @@ describe "Inspec::Resources::X509Certificate" do
     end
     # Expired
     Time.stub :now, Time.new(2018, 4, 1, 1, 28, 57, "+00:00") do
-      _(resource_cert.send("validity_in_days")).must_equal (-31)
+      _(resource_cert.send("validity_in_days")).must_equal(-31)
     end
   end
 end

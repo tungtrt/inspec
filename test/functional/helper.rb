@@ -9,13 +9,6 @@ require "yaml"
 require "tmpdir"
 
 require "minitest/hell"
-class Minitest::Test
-  parallelize_me!
-end
-
-class Module
-  include Minitest::Spec::DSL
-end
 
 module Inspec
   class FuncTestRunResult
@@ -75,6 +68,7 @@ module Inspec
 end
 
 module FunctionalHelper
+  extend Minitest::Spec::DSL
   let(:repo_path) do
     path = File.expand_path(File.join( __FILE__, "..", "..", ".."))
     # fix for vagrant repo pathing

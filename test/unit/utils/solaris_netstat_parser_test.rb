@@ -4,7 +4,7 @@
 require "helper"
 
 describe SolarisNetstatParser do
-  let (:parser) { Class.new() { include SolarisNetstatParser }.new }
+  let(:parser) { Class.new() { include SolarisNetstatParser }.new }
 
   describe "#parse_solaris_netset" do
     it "parses nil content" do
@@ -16,13 +16,12 @@ describe SolarisNetstatParser do
     end
 
     it "parses udpv4" do
-      content =
-        """
+      content = <<~END
         UDP: IPv4
            Local Address        Remote Address      State
         -------------------- -------------------- ----------
               *.631                               Idle
-        """
+      END
 
       info = [{
         "protocol" => "udp",
@@ -34,13 +33,12 @@ describe SolarisNetstatParser do
     end
 
     it "parses udpv6" do
-      content =
-        """
+      content = <<~END
         UDP: IPv6
            Local Address                     Remote Address                   State      If
         --------------------------------- --------------------------------- ---------- -----
               *.546                                                         Idle
-        """
+      END
 
       info = [{
         "protocol" => "udp6",
@@ -53,13 +51,12 @@ describe SolarisNetstatParser do
     end
 
     it "parses tcpv4" do
-      content =
-        """
+      content = <<~END
         TCP: IPv4
            Local Address        Remote Address     Swind  Send-Q  Rwind  Recv-Q    State
         -------------------- -------------------- ------- ------ ------- ------ -----------
         127.0.0.1.5999             *.*                  0      0  128000      0 LISTEN
-        """
+      END
 
       info = [{
         "protocol" => "tcp",
@@ -75,13 +72,12 @@ describe SolarisNetstatParser do
     end
 
     it "parses tcpv6" do
-      content =
-        """
+      content = <<~END
         TCP: IPv6
            Local Address                     Remote Address                  Swind  Send-Q  Rwind  Recv-Q   State      If
         --------------------------------- --------------------------------- ------- ------ ------- ------ ----------- -----
         ::1.5999                                *.*                               0      0  128000      0 LISTEN
-        """
+      END
 
       info = [{
         "protocol" => "tcp6",
@@ -98,13 +94,13 @@ describe SolarisNetstatParser do
     end
 
     it "parses sctp" do
-      content =
-        """
+      content = <<~END
         SCTP:
                 Local Address                   Remote Address          Swind  Send-Q Rwind  Recv-Q StrsI/O  State
         ------------------------------- ------------------------------- ------ ------ ------ ------ ------- -----------
         0.0.0.0                         0.0.0.0                              0      0 102400      0  32/32  CLOSED
-        """
+      END
+
       info = [{
         "protocol" => "sctp",
         "local-address" => "0.0.0.0",
