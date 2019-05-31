@@ -105,7 +105,7 @@ require "bundles/inspec-supermarket"
 require "train"
 
 CMD = Train.create("local", command_runner: :generic).connection
-TMP_CACHE = {}.freeze
+TMP_CACHE = {}
 
 Inspec::Log.logger = Logger.new(nil)
 
