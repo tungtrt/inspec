@@ -3,3 +3,5 @@ AllCops:
     - 'test/integration/**/controls/**/*.rb'
     - 'test/unit/mock/profiles/**/*.rb'
     - 'test/unit/mock/config_dirs/**/*.rb'
+    - 'lib/plugins/inspec-init/templates/plugins/inspec-plugin-template/**/*'
+    - 'examples/**/controls/*.rb'
