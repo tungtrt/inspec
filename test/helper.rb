@@ -105,7 +105,7 @@ require "bundles/inspec-supermarket"
 require "train"
 
 CMD = Train.create("local", command_runner: :generic).connection
-TMP_CACHE = {}
+TMP_CACHE = {} # rubocop: disable Style/MutableConstant
 
 Inspec::Log.logger = Logger.new(nil)
 
@@ -720,7 +720,7 @@ end
 def expect_deprecation_warning
   @mock_logger = Minitest::Mock.new
   @mock_logger.expect(:warn, nil, [/DEPRECATION/])
-  Inspec::Log.stub :warn, proc { |message| @mock_logger.warn(message) } do
+  Inspec::Log.stub(:warn, proc { |message| @mock_logger.warn(message) }) do
     yield
   end
   @mock_logger.verify
