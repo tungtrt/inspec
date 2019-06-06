@@ -85,7 +85,7 @@ class Inspec::InspecCLI < Inspec::BaseCLI
   desc 'check PATH', 'verify all tests at the specified PATH'
   option :format, type: :string
   profile_options
-  def check(path) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
+  def check(path) # rubocop:disable Metrics/AbcSize
     o = config
     diagnose(o)
     o['log_location'] ||= STDERR if o['format'] == 'json'
