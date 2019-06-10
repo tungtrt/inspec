@@ -24,4 +24,15 @@ control "test using inputs in the test its block" do
   end
 end
 
+control "test using inputs in a describe.one block" do
+  describe.one do
+    describe input('test-06', value: 'test-06') do
+      it { should cmp 'test-06' }
+    end
+    describe 'test-07' do
+      it { should cmp input('test-07', value: 'test-07') }
+    end
+  end
+end
+
 # TODO: add test for OR
