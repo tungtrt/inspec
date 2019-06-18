@@ -218,9 +218,9 @@ Test Summary: 0 successful, 0 failures, 0 skipped
     let(:stdout) { out.stdout.force_encoding(Encoding::UTF_8) }
     it "exits with an error" do
       skip if ENV["NO_AWS"]
-      stdout.must_include "Resource `aws_iam_users` is not supported on platform"
-      stdout.must_include "Resource `aws_iam_access_keys` is not supported on platform"
-      stdout.must_include "Resource `aws_s3_bucket` is not supported on platform"
+      stdout.must_include "Unsupported resource/backend combination: aws_iam_users"
+      stdout.must_include "Unsupported resource/backend combination: aws_iam_access_keys"
+      stdout.must_include "Unsupported resource/backend combination: aws_s3_bucket"
       stdout.must_include "3 failures"
       out.exit_status.must_equal 100
     end
