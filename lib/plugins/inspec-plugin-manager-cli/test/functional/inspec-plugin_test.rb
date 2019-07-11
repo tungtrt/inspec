@@ -38,6 +38,7 @@ module PluginManagerHelpers
   def clear_empty_config_dir
     Dir.glob(File.join(project_config_dirs_path, "empty", "*")).each do |path|
       next if path.end_with? ".gitkeep"
+
       FileUtils.rm_rf(path)
     end
   end
@@ -89,14 +90,19 @@ class PluginManagerCliList < Minitest::Test
 
   def test_list_all_when_no_user_plugins_installed
     result = run_inspec_process_with_this_plugin("plugin list --all")
-    assert_equal 0, result.exit_status, "exist status must be 0"
-    assert_includes result.stdout, "6 plugin(s) total", "--all list should find six"
-    assert_includes result.stdout, "inspec-plugin-manager-cli", "--all list should find inspec-plugin-manager-cli"
-    assert_includes result.stdout, "habitat", "--all list should find habitat"
+    plugin_lines = result.stdout.lines.filter { |line| line.match(/^\s*(inspec|train)-/) }
 
-    result = run_inspec_process_with_this_plugin("plugin list -a")
+    # Look for a specific plugin of each type - core, bundle, and system
+    [
+      { name: "inspec-plugin-manager-cli", type: "core" },
+      { name: "inspec-supermarket", type: "bundle" },
+      { name: "train-aws", type: "gem (system)" },
+    ].each do |test_case|
+      plugin_line = plugin_lines.detect { |line| line.include? test_case[:name] }
+      refute_nil plugin_line, "#{test_case[:name]} should be detected in plugin list --all output"
+      assert_includes plugin_line, test_case[:type], "#{test_case[:name]} should be detected as a '#{test_case[:type]}' type in list --all "
+    end
     assert_equal 0, result.exit_status, "exist status must be 0"
-    assert_includes result.stdout, "6 plugin(s) total", "-a list should find six"
   end
 
   def test_list_when_gem_and_path_plugins_installed
@@ -109,14 +115,14 @@ class PluginManagerCliList < Minitest::Test
     assert_equal 0, result.exit_status, "exist status must be 0"
     assert_includes result.stdout, "2 plugin(s) total", "gem+path should show two plugins"
 
-    # Plugin Name                   Version   Via     ApiVer
-    # -------------------------------------------------------
-    #  inspec-meaning-of-life        src       path    2
-    #  inspec-test-fixture           0.1.0     gem     2
-    # -------------------------------------------------------
+    # Plugin Name                   Version   Via         ApiVer
+    # ---------------------------------------------------------
+    #  inspec-meaning-of-life        src       path         2
+    #  inspec-test-fixture           0.1.0     gem (user)   2
+    # ---------------------------------------------------------
     #  2 plugin(s) total
-    gem_line = result.stdout.split("\n").grep(/gem/).first
-    assert_match(/\s*inspec-\S+\s+\d+\.\d+\.\d+\s+gem\s+2/, gem_line)
+    gem_line = result.stdout.split("\n").grep(/gem \(user\)/).first
+    assert_match(/\s*inspec-\S+\s+\d+\.\d+\.\d+\s+gem \(user\)\s+2/, gem_line)
     path_line = result.stdout.split("\n").grep(/path/).first
     assert_match(/\s*inspec-\S+\s+src\s+path\s+2/, path_line)
   end
@@ -131,15 +137,15 @@ class PluginManagerCliList < Minitest::Test
     assert_equal 0, result.exit_status, "exist status must be 0"
     assert_includes result.stdout, "1 plugin(s) total", "list train should show one plugins"
 
-    # Plugin Name                   Version   Via     ApiVer
-    # -------------------------------------------------------
-    #  train-test-fixture            0.1.0    gem     train-1
-    # -------------------------------------------------------
+    # Plugin Name                   Version   Via        ApiVer
+    # -------------------------------------------------------------
+    #  train-test-fixture            0.1.0    gem (user)  train-1
+    # -------------------------------------------------------------
     #  1 plugin(s) total
     train_line = result.stdout.split("\n").grep(/train/).first
     assert_includes(train_line, "train-test-fixture")
     assert_includes(train_line, "0.1.0")
-    assert_includes(train_line, "gem")
+    assert_includes(train_line, "gem (user)")
     assert_includes(train_line, "train-1")
   end
 end
