@@ -46,6 +46,7 @@ module Inspec::Plugin::V2
       unless @filter_data.key?("exclude") && @filter_data["exclude"].is_a?(Array)
         raise Inspec::Plugin::V2::ConfigError, 'Unknown plugin fillter file format: expected "exclude" to be an array'
       end
+
       @filter_data["exclude"].each_with_index do |entry, idx|
         unless entry.is_a? Hash
           raise Inspec::Plugin::V2::ConfigError, "Unknown plugin fillter file format: expected entry #{idx} to be a Hash / JS Object"
@@ -57,6 +58,16 @@ module Inspec::Plugin::V2
           raise Inspec::Plugin::V2::ConfigError, "Unknown plugin fillter file format: expected entry #{idx} to have a \"rationale\" field"
         end
       end
+    end
+  end
+
+  module FilterPredicates
+    def train_plugin_name?(name)
+      name.to_s.start_with?("train-") && ! Inspec::Plugin::V2::PluginFilter.exclude?(name)
+    end
+
+    def inspec_plugin_name?(name)
+      name.to_s.start_with?("inspec-") && ! Inspec::Plugin::V2::PluginFilter.exclude?(name)
     end
   end
 end
